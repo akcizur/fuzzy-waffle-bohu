@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate model geometry
         run: |
@@ -34,6 +36,8 @@ jobs:
           print("Python source syntax passed.")
           PY
           python -B tools/validate_model.py
+      - name: Compare apartment floors against original
+        run: python -B tools/compare_apartment_column.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

@@ -36,6 +36,26 @@ U dveřního otvoru v nejvyšším podlaží nebyla v původním modelu nalezena
 
 Výsledné ostění má 84 bočních ploch celkem: 6 zachovaných původních a 78 nových čtyřúhelníkových ploch v samostatných objektech podle podlaží. Materiál `OpeningReveal` je samostatný a lze ho dále upravovat v 3D editoru. Generátor před vytvořením ploch porovnává jejich obrysy s existující geometrií, aby stejné boky nepřidával podruhé.
 
+
+## Porovnání bytů s původním modelem
+
+Automatický regresní test načítá původní `house.obj` přímo z prvního uploadu v commitu `544d67f6cbcaa963f1dde9949694e3aa2878af42`. Z původního šestého podlaží vybere 357 jedinečných ploch. Po odečtení dvou původních výplní okenního a balkonového otvoru musí mít každý z 11 bytových modulů přesně 355 ploch a shodovat se s originálem v geometrii, skupině, materiálu i smoothing stavu. Porovnání zpětně odečítá pouze svislé přizpůsobení konkrétní výšce podlaží.
+
+V aktuálním modelu test potvrzuje shodu všech 11 podlaží: žádná chybějící plocha, žádná přidaná plocha a žádné duplicitní plochy uvnitř opakovaných modulů. **Rozdíl, který zůstává, je svislé měřítko nutné pro vyplnění nestejných výšek původní konstrukce:**
+
+| Podlaží | Svislé měřítko | Rozdíl vůči originálu |
+| ---: | ---: | ---: |
+| 1 | 1.0488 | +4.88 % |
+| 2 | 1.0001 | +0.01 % |
+| 3 | 0.9512 | −4.88 % |
+| 4–6 | 1.0000 | 0.00 % |
+| 7 | 1.0002 | +0.02 % |
+| 8 | 1.0001 | +0.01 % |
+| 9–10 | 1.0000 | 0.00 % |
+| 11 | 1.0489 | +4.89 % |
+
+To znamená, že **půdorys a topologie bytů jsou shodné**, ale první, třetí a jedenácté podlaží nemají totožnou svislou geometrii. Příčinou jsou rozdílné výšky pater v původním modelu, nikoli chybné kopírování polygonů. Pokud má být každý byt fyzicky rozměrově identický, musí se nejprve sjednotit výšková osnova celé budovy; pouhé vypnutí Y měřítka by v kratším třetím podlaží způsobilo kolizi se sousedním podlažím.
+
 ## Ovládání prohlížeče
 
 - Levé tlačítko myši: otáčení
