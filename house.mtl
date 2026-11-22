@@ -1,0 +1,19 @@
+# Reconstructed neutral material palette for house.obj.
+# The original house.mtl referenced by the OBJ was not present in the repository.
+# These are presentation materials, not recovered source colors.
+
+newmtl Material__743
+Ka 0.16 0.16 0.15
+Kd 0.72 0.71 0.67
+Ks 0.16 0.16 0.16
+Ns 28.0
+d 1.0
+illum 2
+
+newmtl Material__764
+Ka 0.08 0.09 0.10
+Kd 0.29 0.32 0.35
+Ks 0.24 0.25 0.27
+Ns 42.0
+d 1.0
+illum 2
