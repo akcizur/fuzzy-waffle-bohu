@@ -128,7 +128,7 @@
     <aside class="panel">
       <div class="eyebrow">01 / Object file</div>
       <h1>House model</h1>
-      <p class="panel-intro">Prostorová studie původního OBJ modelu. Otáčej, přibližuj a kontroluj geometrii přímo v prohlížeči.</p>
+      <p class="panel-intro">Třírozměrná studie domu s opakovanou bytovou dispozicí ve všech 11 podlažích. Přepni mezi celým domem a samotným sloupcem bytů.</p>
 
       <div class="rule"></div>
       <div class="section-head"><span class="eyebrow">Camera</span><span>02 / VIEW</span></div>
@@ -148,13 +148,17 @@
         <button class="tool-button" id="grid-button" aria-pressed="true"><span>▦</span> Ground grid</button>
         <button class="tool-button" id="fit-button"><span>⌗</span> Reset view</button>
       </div>
+      <div class="tool-row" style="margin-top:6px">
+        <button class="tool-button" id="apartment-button" aria-pressed="false"><span>▥</span> Apartment stack</button>
+        <button class="tool-button" id="building-button" aria-pressed="true"><span>⌂</span> Full building</button>
+      </div>
 
       <div class="rule"></div>
       <div class="section-head"><span class="eyebrow">Model data</span><span>04 / SOURCE</span></div>
       <div class="metric-list">
-        <div class="metric"><span class="metric-label">Vertices</span><span class="metric-value">3,912</span></div>
-        <div class="metric"><span class="metric-label">Polygons</span><span class="metric-value">3,289</span></div>
-        <div class="metric"><span class="metric-label">Groups</span><span class="metric-value">house / kv</span></div>
+        <div class="metric"><span class="metric-label">Vertices</span><span class="metric-value">8,732</span></div>
+        <div class="metric"><span class="metric-label">Polygons</span><span class="metric-value">6,859</span></div>
+        <div class="metric"><span class="metric-label">Groups</span><span class="metric-value">house / kv + 11 floors</span></div>
         <div class="metric"><span class="metric-label">Dimensions</span><span class="metric-value" id="dimensions">loading…</span></div>
       </div>
 
@@ -294,6 +298,29 @@
       });
     }
 
+    function setApartmentOnly(enabled) {
+      if (!model) return;
+
+      const belongsToApartment = (node) => {
+        let current = node;
+        while (current && current !== model) {
+          if (typeof current.name === "string" && current.name.startsWith("apartment_column_floor_")) {
+            return true;
+          }
+          current = current.parent;
+        }
+        return false;
+      };
+
+      model.traverse((node) => {
+        if (node.isMesh) node.visible = !enabled || belongsToApartment(node);
+      });
+
+      document.querySelector("#apartment-button").setAttribute("aria-pressed", String(enabled));
+      document.querySelector("#building-button").setAttribute("aria-pressed", String(!enabled));
+      statusLabel.textContent = enabled ? "APARTMENT STACK" : "MODEL ONLINE";
+    }
+
     function setCameraView(view) {
       const distance = maxDimension * 2.15;
       camera.up.set(0, 1, 0);
@@ -418,6 +445,14 @@
     document.querySelector("#fit-button").addEventListener("click", () => {
       controls.reset();
       setCameraView("perspective");
+    });
+
+    document.querySelector("#apartment-button").addEventListener("click", () => {
+      setApartmentOnly(true);
+    });
+
+    document.querySelector("#building-button").addEventListener("click", () => {
+      setApartmentOnly(false);
     });
 
     renderer.setAnimationLoop(() => {
