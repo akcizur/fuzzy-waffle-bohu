@@ -30,11 +30,11 @@ V každém podlaží jsou také zachovány dva původní vnitřní dveřní prů
 
 ## Ostění a hloubka stěn
 
-U 21 otvorů, za kterými zdrojový model obsahoval odpovídající vnější stěnovou rovinu, byly doplněny čtyři boční plochy ostění. Hloubka každého ostění je odvozena ze vzdálenosti mezi původní rovinou vnějšího stěnového panelu a rovinou odstraněné okenní / dveřní výplně, nikoli z jedné odhadnuté konstanty. Naměřené hloubky se v původních modelových jednotkách pohybují přibližně od 0.3306 do 1.0968.
+U 21 otvorů bylo zkontrolováno všech 84 bočních hran ostění. Šest ploch už bylo součástí původní geometrie (okno v 5. a 6. podlaží a dveře v 6. podlaží), proto byly ponechány a znovu se negenerují. Doplněno bylo pouze zbývajících 78 chybějících ploch. Hloubka každého nového ostění je odvozena ze vzdálenosti mezi původní rovinou vnějšího stěnového panelu a rovinou odstraněné okenní / dveřní výplně, nikoli z jedné odhadnuté konstanty. Naměřené hloubky se v původních modelových jednotkách pohybují přibližně od 0.3306 do 1.0968.
 
 U dveřního otvoru v nejvyšším podlaží nebyla v původním modelu nalezena odpovídající protilehlá stěnová plocha. Otvor proto zůstává průchozí a ostění se tam uměle nedoplňovalo.
 
-Ostění tvoří 84 nových čtyřúhelníkových ploch v samostatných objektech podle podlaží. Materiál `OpeningReveal` je samostatný a lze ho dále upravovat v 3D editoru.
+Výsledné ostění má 84 bočních ploch celkem: 6 zachovaných původních a 78 nových čtyřúhelníkových ploch v samostatných objektech podle podlaží. Materiál `OpeningReveal` je samostatný a lze ho dále upravovat v 3D editoru. Generátor před vytvořením ploch porovnává jejich obrysy s existující geometrií, aby stejné boky nepřidával podruhé.
 
 ## Ovládání prohlížeče
 
@@ -65,14 +65,14 @@ Prohlížeč načítá Three.js a jeho OBJ/MTL loadery z CDN. Model a materiály
 
 | Vlastnost | Hodnota |
 | --- | ---: |
-| Vrcholy | 9,479 |
-| UV souřadnice | 2,819 |
-| Normály | 1,376 |
-| Polygony | 7,027 |
+| Vrcholy | 9,455 |
+| UV souřadnice | 2,795 |
+| Normály | 1,370 |
+| Polygony | 7,021 |
 | Bytové moduly | 11 |
 | Vnější průchozí otvory | 22 |
 | Vnitřní průchozí dveřní otvory | 22 |
-| Ostění | 21 otvorů / 84 ploch |
+| Ostění | 84 ploch celkem / 78 nových |
 | Skupiny původního modelu | `house`, `kv` |
 
 Jednotka ani fyzické měřítko nejsou ve zdrojovém OBJ souboru doložené. Rozměry proto zůstávají v původních modelových jednotkách.

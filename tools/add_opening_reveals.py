@@ -532,6 +532,23 @@ def main() -> None:
     if MARKER in source:
         raise SystemExit("Opening reveals already exist; refusing to duplicate them.")
 
+    # Source-aware duplicate check: some reveal sides are already modelled.
+    source_vertices = []
+    existing_quad_keys = set()
+    for line in source.splitlines():
+        value = line.strip()
+        if value.startswith("v "):
+            source_vertices.append(tuple(float(x) for x in value.split()[1:4]))
+        elif value.startswith("f "):
+            tokens = value.split()[1:]
+            if len(tokens) == 4:
+                points = [
+                    source_vertices[int(token.split("/")[0]) - 1]
+                    for token in tokens
+                ]
+                key = tuple(sorted(tuple(round(x, 3) for x in point) for point in points))
+                existing_quad_keys.add(key)
+
     lines = source.splitlines()
     vertex_count = sum(line.startswith("v ") for line in lines)
     uv_count = sum(line.startswith("vt ") for line in lines)
@@ -582,6 +599,11 @@ def main() -> None:
                 uv = [(0, 0), (length, 0), (length, reveal["inner_z"] - reveal["outer_z"]),
                       (0, reveal["inner_z"] - reveal["outer_z"])]
 
+            point_key = tuple(sorted(tuple(round(float(x), 3) for x in point) for point in positions))
+            if point_key in existing_quad_keys:
+                continue
+            existing_quad_keys.add(point_key)
+
             normal_index = next_vn
             normals.append(f"vn {inward[0]:.7f} {inward[1]:.7f} 0.0000000")
             next_vn += 1
@@ -605,13 +627,13 @@ def main() -> None:
             *object_faces,
         ])
 
-    if face_count != 84 or len(vertices) != 336 or len(uvs) != 336 or len(normals) != 84:
+    if face_count != 78 or len(vertices) != 312 or len(uvs) != 312 or len(normals) != 78:
         raise SystemExit("Reveal geometry validation failed.")
 
     additions = [
         "",
         MARKER,
-        "# 21 wall-backed apertures receive four reveal quads each.",
+        "# 21 apertures receive only missing reveal quads; six source sides are retained.",
         "# Source-measured depths; top-floor door has no backing wall plane.",
         *vertices,
         *uvs,
@@ -620,9 +642,9 @@ def main() -> None:
         "",
     ]
     updated = source.rstrip() + "\n" + "\n".join(additions)
-    if sum(line.startswith("v ") for line in updated.splitlines()) != 9479:
+    if sum(line.startswith("v ") for line in updated.splitlines()) != 9455:
         raise SystemExit("Final vertex count mismatch.")
-    if sum(line.startswith("f ") for line in updated.splitlines()) != 7027:
+    if sum(line.startswith("f ") for line in updated.splitlines()) != 7021:
         raise SystemExit("Final face count mismatch.")
 
     text_copy = updated.replace(

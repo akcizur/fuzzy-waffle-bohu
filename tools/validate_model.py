@@ -11,7 +11,7 @@ OBJ = ROOT / "house.obj"
 TXT = ROOT / "house.txt"
 MTL = ROOT / "house.mtl"
 
-EXPECTED = {"vertices": 9479, "uvs": 2819, "normals": 1376, "faces": 7027}
+EXPECTED = {"vertices": 9455, "uvs": 2795, "normals": 1370, "faces": 7021}
 REVEAL_OBJECT_MARKER = "_opening_reveal"
 
 
@@ -127,7 +127,7 @@ def main():
         raise SystemExit(f"Invalid OBJ references: {invalid_refs}; missing UV/normal refs: {missing_uv_or_normal}")
     if degenerate_faces:
         raise SystemExit(f"Degenerate faces found: {degenerate_faces}")
-    if reveal_face_count != 84 or reveal_normal_errors:
+    if reveal_face_count != 78 or reveal_normal_errors:
         raise SystemExit(f"Reveal QA failed: {reveal_face_count} faces, {reveal_normal_errors} normal errors")
 
     floor_objects = {
@@ -142,9 +142,16 @@ def main():
     }
     if len(reveal_objects) != 21:
         raise SystemExit(f"Expected 21 reveal objects, found {len(reveal_objects)}")
-    if any(object_faces[name] != 4 for name in reveal_objects):
-        raise SystemExit("Every reveal object must contain exactly four quads")
-    if sum(1 for _, material, _ in faces if material == "OpeningReveal") != 84:
+    retained_source_sides = {
+        "apartment_column_floor_05_window_opening_reveal": 2,
+        "apartment_column_floor_06_window_opening_reveal": 2,
+        "apartment_column_floor_06_door_opening_reveal": 2,
+    }
+    for name in reveal_objects:
+        expected_faces = retained_source_sides.get(name, 4)
+        if object_faces[name] != expected_faces:
+            raise SystemExit(f"{name} has {object_faces[name]} faces; expected {expected_faces}")
+    if sum(1 for _, material, _ in faces if material == "OpeningReveal") != 78:
         raise SystemExit("OpeningReveal material face count does not match")
 
     mtl = MTL.read_text(encoding="utf-8")
