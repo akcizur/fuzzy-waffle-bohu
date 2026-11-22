@@ -1,25 +1,40 @@
 # fuzzy-waffle-bohu · HOUSE / Study
 
-Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového bytu v celém svislém sloupci.
+Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového bytu ve všech 11 podlažích. Okna a vysoké dveřní otvory jsou skutečně otevřené skrz obvodové stěny, nejde o tmavé textury ani o ponechané skleněné výplně.
 
 **Demo:** https://akcizur.github.io/fuzzy-waffle-bohu/
 
 ## Co je v repozitáři
 
-- `house.obj` – upravená geometrie domu a jedenáct samostatně pojmenovaných bytových modulů
+- `house.obj` – model domu, 11 bytových modulů a geometricky vyříznuté otvory
 - `house.txt` – synchronizovaná textová kopie modelu
 - `house.mtl` – neutrální materiálová knihovna pro původní názvy materiálů
 - `index.html` – samostatný interaktivní 3D prohlížeč
-- `tools/repeat_apartment_column.py` – reprodukovatelný generátor bytového sloupce pro čistý původní model
+- `tools/repeat_apartment_column.py` – reprodukovatelný generátor bytového sloupce
 - `.github/workflows/pages.yml` – automatické nasazení na GitHub Pages
 
 ## Bytový sloupec
 
-V původním modelu bylo kompletní vnitřní členění nalezeno na šestém podlaží. Z této předlohy bylo vybráno 357 polygonů, které se neopakovaly v ostatních podlažích. Tyto části byly převedeny do samostatných objektů `apartment_column_floor_01` až `apartment_column_floor_11`.
+V původním modelu bylo kompletní vnitřní členění nalezeno na šestém podlaží. Z této předlohy bylo vybráno 357 jedinečných polygonů a přeneseno do všech 11 podlaží. Každý bytový modul je samostatně pojmenovaný jako `apartment_column_floor_01` až `apartment_column_floor_11`.
 
-Stejná půdorysná dispozice je nyní ve všech 11 výškových úrovních. Kopírované části zachovávají souřadnice X/Z; pouze výška Y se přizpůsobí skutečné výšce konkrétního podlaží, aby moduly navazovaly na stávající konstrukční úrovně. Opakující se obvodový plášť a fasádní geometrie se znovu nekopírovaly.
+Půdorysná poloha a rozvržení zůstávají shodné. Výška Y je přizpůsobena skutečné konstrukční výšce daného podlaží. Opakující se fasádní geometrie nebyla zbytečně zdvojována.
 
-Každé podlaží má 357 polygonů bytového modulu. Původní geometrie domu zůstala zachována, pouze jedinečné části vzorového bytu jsou oddělené do pojmenovaných objektů. Díky tomu lze v Blenderu nebo jiném 3D editoru vybrat jednotlivé podlaží samostatně.
+## Skutečné otvory oken a dveří
+
+Ze zdrojového modelu bylo odstraněno 22 skleněných / plných výplňových polygonů, tedy dvě výplně na každé podlaží. Odpovídající plochy vnější stěny byly geometricky rozříznuty podle jejich skutečných obrysů. Vzniklo 22 průchozích otvorů: jedno okenní pole a jeden vysoký dveřní otvor na každý byt.
+
+Otvory nebyly vytvořeny pouze odstraněním skla: ve 31 stěnových panelech byla upravena samotná geometrie stěny. Jeden panel bylo možné odstranit celý, zbývajících 30 bylo rozděleno na nové plochy kolem otvorů. Nové trojúhelníkové plochy zachovávají rovinu a normály původních panelů.
+
+V každém podlaží jsou také zachovány dva původní vnitřní dveřní průchody. Ty byly otevřené už ve zdrojové geometrii, proto se znovu nevyřezávaly.
+
+### Kontrola průchodnosti
+
+Byl proveden geometrický test paprskem skrz stěnu ve středu každého otvoru:
+
+- 22 / 22 vnějších okenních a dveřních otvorů bez kolize
+- 22 / 22 vnitřních dveřních průchodů bez kolize
+
+Test kontroluje skutečné trojúhelníky v OBJ, nikoli pouze viditelnost materiálu v prohlížeči.
 
 ## Ovládání prohlížeče
 
@@ -50,22 +65,24 @@ Prohlížeč načítá Three.js a jeho OBJ/MTL loadery z CDN. Model a materiály
 
 | Vlastnost | Hodnota |
 | --- | ---: |
-| Vrcholy | 8 732 |
-| UV souřadnice | 2 072 |
-| Normály | 881 |
-| Polygony | 6 859 |
+| Vrcholy | 9,143 |
+| UV souřadnice | 2,483 |
+| Normály | 1,292 |
+| Polygony | 6,943 |
 | Bytové moduly | 11 |
-| Polygony na jeden modul | 357 |
+| Jedinečné polygony původního modulu | 357 |
+| Vnější průchozí otvory | 22 |
+| Vnitřní průchozí dveřní otvory | 22 |
 | Skupiny původního modelu | `house`, `kv` |
-| Výškový rozsah X | 103.9872 |
-| Výškový rozsah Y | 169.5991 |
-| Výškový rozsah Z | 97.9452 |
+| Rozměr X | 103.9872 |
+| Rozměr Y | 169.5991 |
+| Rozměr Z | 97.9452 |
 
 Jednotka ani fyzické měřítko nejsou v OBJ souboru doložené. Rozměry proto zůstávají v původních modelových jednotkách.
 
 ### Omezení geometrie
 
-Původní export obsahuje otevřené a vícenásobně sdílené hrany. Opakování bytové dispozice tento problém samo o sobě neopravuje. Model proto zatím nelze považovat za ověřený uzavřený solid pro 3D tisk, konstrukční výpočty nebo BIM bez další kontroly a opravy geometrie.
+Původní export obsahuje otevřené a vícenásobně sdílené hrany. Vyříznutí otvorů zlepšuje průchodnost modelu, ale samo o sobě z něj nedělá uzavřený stavební solid. Před 3D tiskem, konstrukčními výpočty nebo BIM je potřeba provést další opravu a kontrolu geometrie.
 
 ### Materiály
 
@@ -77,4 +94,4 @@ Workflow se spouští po každém pushi do větve `main` a také ručně přes G
 
 ---
 
-Three.js: https://threejs.org/ · original source geometry retained
+Three.js: https://threejs.org/ · original source geometry retained and edited
