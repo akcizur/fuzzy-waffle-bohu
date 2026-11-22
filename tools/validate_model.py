@@ -11,7 +11,7 @@ OBJ = ROOT / "house.obj"
 TXT = ROOT / "house.txt"
 MTL = ROOT / "house.mtl"
 
-EXPECTED = {"vertices": 9455, "uvs": 2795, "normals": 1370, "faces": 7021}
+EXPECTED = {"vertices": 9455, "uvs": 2795, "normals": 1370, "faces": 6891}
 REVEAL_OBJECT_MARKER = "_opening_reveal"
 
 
@@ -130,12 +130,24 @@ def main():
     if reveal_face_count != 78 or reveal_normal_errors:
         raise SystemExit(f"Reveal QA failed: {reveal_face_count} faces, {reveal_normal_errors} normal errors")
 
-    floor_objects = {
-        f"apartment_column_floor_{i:02d}" for i in range(1, 12)
+    floor_face_counts = {
+        "apartment_column_floor_01": 350,
+        "apartment_column_floor_02": 352,
+        "apartment_column_floor_03": 351,
+        "apartment_column_floor_04": 341,
+        "apartment_column_floor_05": 321,
+        "apartment_column_floor_06": 355,
+        "apartment_column_floor_07": 343,
+        "apartment_column_floor_08": 342,
+        "apartment_column_floor_09": 342,
+        "apartment_column_floor_10": 332,
+        "apartment_column_floor_11": 346,
     }
-    for name in floor_objects:
-        if object_faces[name] != 355:
-            raise SystemExit(f"{name} has {object_faces[name]} faces; expected 355")
+    for name, expected_count in floor_face_counts.items():
+        if object_faces[name] != expected_count:
+            raise SystemExit(
+                f"{name} has {object_faces[name]} faces; expected {expected_count}"
+            )
 
     reveal_objects = {
         name for name in object_faces if REVEAL_OBJECT_MARKER in name
@@ -170,6 +182,8 @@ def main():
 
     if "# REAL OPENINGS: WINDOW A + BALCONY DOOR THROUGH-WALL CUTS v1" not in obj_text:
         raise SystemExit("Through-wall opening marker is missing")
+    if "# GENERATED: REDUNDANT SHELL SURFACES REMOVED v1" not in obj_text:
+        raise SystemExit("Redundant shell surface cleanup marker is missing")
     if "# GENERATED: OPENING REVEALS v1" not in obj_text:
         raise SystemExit("Opening reveal marker is missing")
 

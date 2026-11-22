@@ -12,14 +12,33 @@ Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového
 - `index.html` – samostatný interaktivní 3D prohlížeč
 - `tools/repeat_apartment_column.py` – reprodukovatelný generátor bytového sloupce
 - `tools/add_opening_reveals.py` – reprodukovatelné doplnění ostění otvorů
+- `tools/remove_duplicate_shell_faces.py` – kontrola překryvů bytů s pláštěm
 - `tools/validate_openings.py` – ray-test průchodnosti všech 22 otvorů
 - `.github/workflows/pages.yml` – automatické nasazení na GitHub Pages
 
 ## Bytový sloupec
 
-V původním modelu bylo kompletní vnitřní členění nalezeno na šestém podlaží. Z této předlohy bylo vybráno 357 jedinečných polygonů a přeneseno do všech 11 podlaží. Každý bytový modul je samostatně pojmenovaný jako `apartment_column_floor_01` až `apartment_column_floor_11`.
+V původním modelu bylo kompletní vnitřní členění nalezeno na šestém podlaží. Z této předlohy bylo vybráno 357 jedinečných polygonů; po odečtení dvou původních výplní otvorů zůstává 355 kandidátních ploch pro každé podlaží.
 
-Půdorysná poloha a rozvržení zůstávají shodné. Výška Y je přizpůsobena skutečné konstrukční výšce daného podlaží. Opakující se fasádní geometrie nebyla zbytečně zdvojována.
+Při kontrole napojení na plášť se ukázalo, že část těchto polygonů už existuje v původní geometrii domu. Kdyby se kopírovaly také, vznikaly by téměř totožné koplanární plochy, které mohou v prohlížeči způsobovat z-fighting. Proto se z bytových kopií odstranilo 130 ploch, jejichž plochu už z více než 99 % pokrývá stejný materiál a stejně orientovaná plocha původního pláště. Původní plochy zůstávají zachované v plášti, nejde tedy o ztrátu geometrie.
+
+Výsledné moduly apartment_column_floor_01 až apartment_column_floor_11 obsahují pouze geometrii, která není už reprezentována pláštěm. Jejich rozdílný počet ploch je záměrný a odpovídá ověřenému překryvu s původní konstrukcí:
+
+| Podlaží | Plochy v modulu | Plochy ponechané pouze v plášti |
+| ---: | ---: | ---: |
+| 1 | 350 | 5 |
+| 2 | 352 | 3 |
+| 3 | 351 | 4 |
+| 4 | 341 | 14 |
+| 5 | 321 | 34 |
+| 6 | 355 | 0 |
+| 7 | 343 | 12 |
+| 8 | 342 | 13 |
+| 9 | 342 | 13 |
+| 10 | 332 | 23 |
+| 11 | 346 | 9 |
+
+Generátor bytového sloupce zachovává půdorysnou polohu a původní rozvržení. Výška Y je přizpůsobena skutečné konstrukční výšce daného podlaží. Koplanární překryvy lze znovu zkontrolovat příkazem python tools/remove_duplicate_shell_faces.py --check.
 
 ## Skutečné otvory oken a dveří
 
@@ -42,9 +61,11 @@ Výsledné ostění má 84 bočních ploch celkem: 6 zachovaných původních a 
 
 ## Porovnání bytů s původním modelem
 
-Automatický regresní test načítá původní `house.obj` přímo z prvního uploadu v commitu `544d67f6cbcaa963f1dde9949694e3aa2878af42`. Z původního šestého podlaží vybere 357 jedinečných ploch. Po odečtení dvou původních výplní okenního a balkonového otvoru musí mít každý z 11 bytových modulů přesně 355 ploch a shodovat se s originálem v geometrii, skupině, materiálu i smoothing stavu. Porovnání zpětně odečítá pouze svislé přizpůsobení konkrétní výšce podlaží.
+Automatický regresní test načítá původní house.obj přímo z prvního uploadu v commitu 544d67f6cbcaa963f1dde9949694e3aa2878af42. Z původního šestého podlaží vybere 357 jedinečných ploch a odečte dvě původní skleněné / plné výplně. Zbývajících 355 kandidátních ploch pro každé podlaží porovnává v geometrii, skupině, materiálu i smoothing stavu.
 
-V aktuálním modelu test potvrzuje shodu všech 11 podlaží: žádná chybějící plocha, žádná přidaná plocha a žádné duplicitní plochy uvnitř opakovaných modulů. **Rozdíl, který zůstává, je svislé měřítko nutné pro vyplnění nestejných výšek původní konstrukce:**
+Před porovnáním test ověří, které kandidátní plochy jsou už obsažené v původním plášti. Tyto plochy se v bytovém modulu neopakují, ale zůstávají v hlavním modelu. Všech 130 vynechaných ploch je geometricky pokryto stejným materiálem, orientací a rovinou pláště. Všechny zbývající plochy odpovídají zdrojové dispozici bez chybějících nebo přidaných polygonů.
+
+Zbylý rozdíl v měřítku Y je nutný pro vyplnění nestejných výšek původní konstrukce:
 
 | Podlaží | Svislé měřítko | Rozdíl vůči originálu |
 | ---: | ---: | ---: |
@@ -57,7 +78,7 @@ V aktuálním modelu test potvrzuje shodu všech 11 podlaží: žádná chyběj�
 | 9–10 | 1.0000 | 0.00 % |
 | 11 | 1.0489 | +4.89 % |
 
-To znamená, že **půdorys a topologie bytů jsou shodné**, ale první, třetí a jedenácté podlaží nemají totožnou svislou geometrii. Příčinou jsou rozdílné výšky pater v původním modelu, nikoli chybné kopírování polygonů. Pokud má být každý byt fyzicky rozměrově identický, musí se nejprve sjednotit výšková osnova celé budovy; pouhé vypnutí Y měřítka by v kratším třetím podlaží způsobilo kolizi se sousedním podlažím.
+Půdorys a topologie opakovaných bytových ploch zůstávají shodné s originálem. První, třetí a jedenácté podlaží nemají totožnou svislou geometrii kvůli rozdílným výškám původních podlaží. Pouhé vypnutí Y měřítka by v kratším třetím podlaží způsobilo kolizi se sousedním podlažím.
 
 ## Ovládání prohlížeče
 
@@ -91,11 +112,12 @@ Prohlížeč načítá Three.js a jeho OBJ/MTL loadery z CDN. Model a materiály
 | Vrcholy | 9,455 |
 | UV souřadnice | 2,795 |
 | Normály | 1,370 |
-| Polygony | 7,021 |
-| Bytové moduly | 11 |
+| Polygony | 6,891 |
+| Bytové moduly | 11 (3,775 ploch po odstranění překryvů) |
 | Vnější průchozí otvory | 22 |
 | Vnitřní průchozí dveřní otvory | 22 |
 | Ostění | 84 ploch celkem / 78 nových |
+| Duplicitní shell plochy odstraněné z bytových kopií | 130 |
 | Skupiny původního modelu | `house`, `kv` |
 
 Jednotka ani fyzické měřítko nejsou ve zdrojovém OBJ souboru doložené. Rozměry proto zůstávají v původních modelových jednotkách.

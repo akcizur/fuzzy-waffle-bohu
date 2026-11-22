@@ -36,6 +36,8 @@ jobs:
           print("Python source syntax passed.")
           PY
           python -B tools/validate_model.py
+      - name: Validate shell overlap cleanup
+        run: python -B tools/remove_duplicate_shell_faces.py --check
       - name: Validate through-wall opening clearance
         run: python -B tools/validate_openings.py
       - name: Compare apartment floors against original

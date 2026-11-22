@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-"""Compare every repeated apartment module against the original sixth-floor source.
-
-The source OBJ is read from the repository's original upload commit, not from a
-hand-maintained approximation. The comparison reverses the per-storey Y fit
-before comparing polygon geometry, material, group and smoothing state.
-"""
+"""Compare the repeated apartment geometry against the original sixth-floor source."""
 from __future__ import annotations
 
 import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
+
+from remove_duplicate_shell_faces import build_shell_triangles, shell_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
 CURRENT_OBJ = ROOT / "house.obj"
@@ -23,7 +20,10 @@ FLOOR_LEVELS = [
 SOURCE_FLOOR = 5
 EXPECTED_SOURCE_FACES = 357
 EXPECTED_REMOVED_INFILL_FACES = 2
-EXPECTED_FLOOR_FACES = 355
+EXPECTED_RETAINED_FLOOR_FACES = {
+    1: 350, 2: 352, 3: 351, 4: 341, 5: 321, 6: 355,
+    7: 343, 8: 342, 9: 342, 10: 332, 11: 346,
+}
 
 
 def parse_obj(text: str):
@@ -91,8 +91,6 @@ def find_floor(face) -> int:
 
 
 def quantize(value: float) -> int:
-    # Match tools/repeat_apartment_column.py exactly, including Python's
-    # ties-to-even round() behaviour at the 0.01 source precision.
     return round(value * 100)
 
 
@@ -200,29 +198,52 @@ def main() -> None:
         full_signature(face, lambda y: y - FLOOR_LEVELS[SOURCE_FLOOR])
         for face in removed
     }
-    expected = [
-        full_signature(face, lambda y: y - FLOOR_LEVELS[SOURCE_FLOOR])
-        for face in reference
-        if full_signature(face, lambda y: y - FLOOR_LEVELS[SOURCE_FLOOR])
-        not in removed_signatures
+
+    shell_faces = [
+        face for face in current_faces
+        if not face["object"].startswith("apartment_column_floor_")
     ]
-    expected_counts = Counter(expected)
-    if sum(expected_counts.values()) != EXPECTED_FLOOR_FACES:
-        raise SystemExit("Expected apartment face count after opening removal is incorrect.")
+    shell_triangles = build_shell_triangles(shell_faces)
 
     results = []
     for floor in range(len(FLOOR_LEVELS) - 1):
-        name = f"apartment_column_floor_{floor + 1:02d}"
-        records = [face for face in current_faces if face["object"] == name]
-        scale = (
-            (FLOOR_LEVELS[floor + 1] - FLOOR_LEVELS[floor])
-            / (FLOOR_LEVELS[SOURCE_FLOOR + 1] - FLOOR_LEVELS[SOURCE_FLOOR])
+        floor_number = floor + 1
+        name = f"apartment_column_floor_{floor_number:02d}"
+        lower, upper = FLOOR_LEVELS[floor:floor + 2]
+        source_lower = FLOOR_LEVELS[SOURCE_FLOOR]
+        scale = (upper - lower) / (
+            FLOOR_LEVELS[SOURCE_FLOOR + 1] - source_lower
         )
+
+        expected = []
+        shell_covered = 0
+        for face in reference:
+            source_signature = full_signature(
+                face, lambda y: y - source_lower
+            )
+            if source_signature in removed_signatures:
+                continue
+
+            mapped_face = dict(face)
+            mapped_face["points"] = [
+                (x, lower + (y - source_lower) * scale, z)
+                for x, y, z in face["points"]
+            ]
+            if shell_coverage(mapped_face, shell_triangles) >= 0.99:
+                shell_covered += 1
+            else:
+                expected.append(source_signature)
+
+        expected_counts = Counter(expected)
+        records = [
+            face for face in current_faces
+            if face["object"] == name
+        ]
         actual = [
             full_signature(
                 face,
-                lambda y, lower=FLOOR_LEVELS[floor], factor=scale:
-                    (y - lower) / factor,
+                lambda y, base=lower, factor=scale:
+                    (y - base) / factor,
             )
             for face in records
         ]
@@ -230,35 +251,50 @@ def main() -> None:
 
         missing = sum((expected_counts - actual_counts).values())
         extra = sum((actual_counts - expected_counts).values())
-        if len(records) != EXPECTED_FLOOR_FACES or missing or extra:
+        expected_count = EXPECTED_RETAINED_FLOOR_FACES[floor_number]
+        if (
+            len(expected) != expected_count
+            or len(records) != expected_count
+            or missing
+            or extra
+        ):
             raise SystemExit(
-                f"{name} does not match the original: "
-                f"{len(records)} faces, {missing} missing, {extra} extra."
+                f"{name} does not match the source after shell deduplication: "
+                f"{len(records)} faces, expected {expected_count}, "
+                f"{missing} missing, {extra} extra; "
+                f"{shell_covered} shell-covered faces omitted."
             )
 
         group_counts = Counter(face["group"] for face in records)
-        material_counts = Counter(face["material"] for face in records)
         results.append({
-            "floor": floor + 1,
+            "floor": floor_number,
             "scale": scale,
             "faces": len(records),
+            "omitted": shell_covered,
             "groups": group_counts,
-            "materials": material_counts,
         })
+
+    omitted_total = sum(row["omitted"] for row in results)
+    if omitted_total != 130:
+        raise SystemExit(
+            f"Expected 130 shell-covered source faces omitted from the copies, "
+            f"found {omitted_total}."
+        )
 
     print(
         f"Apartment comparison passed: {EXPECTED_SOURCE_FACES} original unique faces, "
         f"{EXPECTED_REMOVED_INFILL_FACES} infill faces removed, "
-        f"{EXPECTED_FLOOR_FACES} matching faces on all 11 floors."
+        f"{omitted_total} already-present shell surfaces not duplicated, "
+        "remaining geometry matches on all 11 floors."
     )
-    print("Floor | Y fit | delta | faces | house | kv")
+    print("Floor | retained | shell copy omitted | Y fit | delta | house | kv")
     for row in results:
         scale = row["scale"]
         delta = (scale - 1) * 100
         print(
-            f"{row['floor']:>5} | {scale:>5.4f} | {delta:+6.2f}% | "
-            f"{row['faces']:>5} | {row['groups'].get('house', 0):>5} | "
-            f"{row['groups'].get('kv', 0):>3}"
+            f"{row['floor']:>5} | {row['faces']:>8} | {row['omitted']:>18} | "
+            f"{scale:>5.4f} | {delta:+6.2f}% | "
+            f"{row['groups'].get('house', 0):>5} | {row['groups'].get('kv', 0):>3}"
         )
 
 
