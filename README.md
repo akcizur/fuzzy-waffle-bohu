@@ -59,7 +59,7 @@ Názvy materiálů \`Material__743\` a \`Material__764\` jsou převzaté z OBJ. 
 
 ## Nasazení na GitHub Pages
 
-Workflow se spouští po každém pushi do větve \`main\` a také ručně přes GitHub Actions. V nastavení repozitáře musí být GitHub Pages nastavené na **GitHub Actions**.
+Workflow se spouští po každém pushi do větve \`main\` a také ručně přes GitHub Actions. Při prvním nasazení otevři **Settings → Pages → Build and deployment** a nastav **Source: GitHub Actions**. Aktuální GitHub Actions token nemá oprávnění vytvořit Pages web automaticky, takže tuto jednorázovou aktivaci musí provést správce repozitáře. Potom v **Actions** spusť workflow „Deploy model viewer“ ručně, případně odešli další commit do `main`.
 
 ---
 
