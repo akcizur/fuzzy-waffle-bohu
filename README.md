@@ -12,6 +12,7 @@ Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového
 - `index.html` – samostatný interaktivní 3D prohlížeč
 - `tools/repeat_apartment_column.py` – reprodukovatelný generátor bytového sloupce
 - `tools/add_opening_reveals.py` – reprodukovatelné doplnění ostění otvorů
+- `tools/validate_openings.py` – ray-test průchodnosti všech 22 otvorů
 - `.github/workflows/pages.yml` – automatické nasazení na GitHub Pages
 
 ## Bytový sloupec
@@ -27,6 +28,8 @@ Ze zdrojového modelu bylo odstraněno 22 skleněných / plných výplňových p
 Otvory nejsou jen tmavé textury: původní plocha skla a odpovídající části stěn byly odstraněny z geometrie. Průchodnost byla kontrolována vzorkovací mřížkou přes plochu všech 22 otvorů; po celé ploše nebyla nalezena žádná zbývající stěnová nebo skleněná plocha.
 
 V každém podlaží jsou také zachovány dva původní vnitřní dveřní průchody. Ty byly otevřené už ve zdrojové geometrii a nebyly znovu vyřezávány.
+
+Automatický test průchodnosti vzorkuje vnitřek všech 22 vnějších otvorů paprsky skrz jejich změřenou hloubku. Kontroluje 2 926 bodů a ověřuje, že uvnitř otvorů nezůstala žádná protínající stěnová ani skleněná plocha. Test zahrnuje i dveře v 11. podlaží, přestože u nich chybí odpovídající vnější plocha pláště.
 
 ## Ostění a hloubka stěn
 

@@ -36,6 +36,8 @@ jobs:
           print("Python source syntax passed.")
           PY
           python -B tools/validate_model.py
+      - name: Validate through-wall opening clearance
+        run: python -B tools/validate_openings.py
       - name: Compare apartment floors against original
         run: python -B tools/compare_apartment_column.py
 
