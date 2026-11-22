@@ -312,10 +312,11 @@ def main():
         print("Shell cleanup already applied; no redundant surfaces found.")
         return
 
-    if dict(per_floor) != EXPECTED_REMOVALS or len(redundant) != 130:
+    observed = {name: per_floor.get(name, 0) for name in EXPECTED_REMOVALS}
+    if observed != EXPECTED_REMOVALS or len(redundant) != 130:
         raise SystemExit(
             "Unexpected cleanup candidate set. "
-            f"Found {len(redundant)} faces: {dict(per_floor)}. "
+            f"Found {len(redundant)} faces: {observed}. "
             "Expected the reviewed 130-face set; no file was changed."
         )
 
