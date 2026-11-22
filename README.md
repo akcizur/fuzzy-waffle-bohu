@@ -1,16 +1,17 @@
 # fuzzy-waffle-bohu · HOUSE / Study
 
-Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového bytu ve všech 11 podlažích. Okna a vysoké dveřní otvory jsou skutečně otevřené skrz obvodové stěny, nejde o tmavé textury ani o ponechané skleněné výplně.
+Interaktivní 3D model bytového domu s opakovanou dispozicí jednoho vzorového bytu ve všech 11 podlažích. Okna a dveřní otvory jsou skutečně otevřené skrz obvodové stěny a doplněné o ostění v hloubce původních stěnových panelů.
 
 **Demo:** https://akcizur.github.io/fuzzy-waffle-bohu/
 
 ## Co je v repozitáři
 
-- `house.obj` – model domu, 11 bytových modulů a geometricky vyříznuté otvory
+- `house.obj` – model domu, 11 bytových modulů, skutečné otvory a ostění
 - `house.txt` – synchronizovaná textová kopie modelu
-- `house.mtl` – neutrální materiálová knihovna pro původní názvy materiálů
+- `house.mtl` – materiálová knihovna včetně materiálu ostění
 - `index.html` – samostatný interaktivní 3D prohlížeč
 - `tools/repeat_apartment_column.py` – reprodukovatelný generátor bytového sloupce
+- `tools/add_opening_reveals.py` – reprodukovatelné doplnění ostění otvorů
 - `.github/workflows/pages.yml` – automatické nasazení na GitHub Pages
 
 ## Bytový sloupec
@@ -23,18 +24,17 @@ Půdorysná poloha a rozvržení zůstávají shodné. Výška Y je přizpůsobe
 
 Ze zdrojového modelu bylo odstraněno 22 skleněných / plných výplňových polygonů, tedy dvě výplně na každé podlaží. Odpovídající plochy vnější stěny byly geometricky rozříznuty podle jejich skutečných obrysů. Vzniklo 22 průchozích otvorů: jedno okenní pole a jeden vysoký dveřní otvor na každý byt.
 
-Otvory nebyly vytvořeny pouze odstraněním skla: ve 31 stěnových panelech byla upravena samotná geometrie stěny. Jeden panel bylo možné odstranit celý, zbývajících 30 bylo rozděleno na nové plochy kolem otvorů. Nové trojúhelníkové plochy zachovávají rovinu a normály původních panelů.
+Otvory nejsou jen tmavé textury: původní plocha skla a odpovídající části stěn byly odstraněny z geometrie. Průchodnost byla kontrolována vzorkovací mřížkou přes plochu všech 22 otvorů; po celé ploše nebyla nalezena žádná zbývající stěnová nebo skleněná plocha.
 
-V každém podlaží jsou také zachovány dva původní vnitřní dveřní průchody. Ty byly otevřené už ve zdrojové geometrii, proto se znovu nevyřezávaly.
+V každém podlaží jsou také zachovány dva původní vnitřní dveřní průchody. Ty byly otevřené už ve zdrojové geometrii a nebyly znovu vyřezávány.
 
-### Kontrola průchodnosti
+## Ostění a hloubka stěn
 
-Byl proveden geometrický test paprskem skrz stěnu ve středu každého otvoru:
+U 21 otvorů, za kterými zdrojový model obsahoval odpovídající vnější stěnovou rovinu, byly doplněny čtyři boční plochy ostění. Hloubka každého ostění je odvozena ze vzdálenosti mezi původní rovinou vnějšího stěnového panelu a rovinou odstraněné okenní / dveřní výplně, nikoli z jedné odhadnuté konstanty. Naměřené hloubky se v původních modelových jednotkách pohybují přibližně od 0.3306 do 1.0968.
 
-- 22 / 22 vnějších okenních a dveřních otvorů bez kolize
-- 22 / 22 vnitřních dveřních průchodů bez kolize
+U dveřního otvoru v nejvyšším podlaží nebyla v původním modelu nalezena odpovídající protilehlá stěnová plocha. Otvor proto zůstává průchozí a ostění se tam uměle nedoplňovalo.
 
-Test kontroluje skutečné trojúhelníky v OBJ, nikoli pouze viditelnost materiálu v prohlížeči.
+Ostění tvoří 84 nových čtyřúhelníkových ploch v samostatných objektech podle podlaží. Materiál `OpeningReveal` je samostatný a lze ho dále upravovat v 3D editoru.
 
 ## Ovládání prohlížeče
 
@@ -46,7 +46,7 @@ Test kontroluje skutečné trojúhelníky v OBJ, nikoli pouze viditelnost materi
 - Auto orbit: pomalé automatické otáčení
 - Ground grid: pomocná podložka
 - Reset view: návrat ke standardní perspektivě
-- Apartment stack: zobrazí pouze bytové moduly
+- Apartment stack: zobrazí pouze bytové moduly včetně ostění
 - Full building: zobrazí celý dům včetně pláště
 
 ## Spuštění lokálně
@@ -65,32 +65,21 @@ Prohlížeč načítá Three.js a jeho OBJ/MTL loadery z CDN. Model a materiály
 
 | Vlastnost | Hodnota |
 | --- | ---: |
-| Vrcholy | 9,143 |
-| UV souřadnice | 2,483 |
-| Normály | 1,292 |
-| Polygony | 6,943 |
+| Vrcholy | 9,479 |
+| UV souřadnice | 2,819 |
+| Normály | 1,376 |
+| Polygony | 7,027 |
 | Bytové moduly | 11 |
-| Jedinečné polygony původního modulu | 357 |
 | Vnější průchozí otvory | 22 |
 | Vnitřní průchozí dveřní otvory | 22 |
+| Ostění | 21 otvorů / 84 ploch |
 | Skupiny původního modelu | `house`, `kv` |
-| Rozměr X | 103.9872 |
-| Rozměr Y | 169.5991 |
-| Rozměr Z | 97.9452 |
 
-Jednotka ani fyzické měřítko nejsou v OBJ souboru doložené. Rozměry proto zůstávají v původních modelových jednotkách.
+Jednotka ani fyzické měřítko nejsou ve zdrojovém OBJ souboru doložené. Rozměry proto zůstávají v původních modelových jednotkách.
 
 ### Omezení geometrie
 
-Původní export obsahuje otevřené a vícenásobně sdílené hrany. Vyříznutí otvorů zlepšuje průchodnost modelu, ale samo o sobě z něj nedělá uzavřený stavební solid. Před 3D tiskem, konstrukčními výpočty nebo BIM je potřeba provést další opravu a kontrolu geometrie.
-
-### Materiály
-
-Názvy materiálů `Material__743` a `Material__764` jsou převzaté z OBJ. Barvy v `house.mtl` jsou prezentační náhrada; původní materiálová knihovna v repozitáři chyběla.
-
-## Nasazení na GitHub Pages
-
-Workflow se spouští po každém pushi do větve `main` a také ručně přes GitHub Actions. Při prvním nasazení otevři **Settings → Pages → Build and deployment** a nastav **Source: GitHub Actions**.
+Původní export obsahuje otevřené a vícenásobně sdílené hrany. Vyříznutí otvorů a doplnění ostění zlepšují prostorovou geometrii, ale samo o sobě z modelu nedělá uzavřený stavební solid. Před 3D tiskem, konstrukčními výpočty nebo BIM je potřeba provést další opravu a kontrolu geometrie.
 
 ---
 
