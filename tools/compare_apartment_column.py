@@ -22,7 +22,7 @@ EXPECTED_SOURCE_FACES = 357
 EXPECTED_REMOVED_INFILL_FACES = 2
 EXPECTED_RETAINED_FLOOR_FACES = {
     1: 350, 2: 352, 3: 351, 4: 341, 5: 321, 6: 355,
-    7: 343, 8: 342, 9: 342, 10: 332, 11: 346,
+    7: 343, 8: 342, 9: 340, 10: 332, 11: 346,
 }
 
 
@@ -275,9 +275,9 @@ def main() -> None:
         })
 
     omitted_total = sum(row["omitted"] for row in results)
-    if omitted_total != 130:
+    if omitted_total != 132:
         raise SystemExit(
-            f"Expected 130 shell-covered source faces omitted from the copies, "
+            f"Expected 132 shell-covered source faces omitted from the copies, "
             f"found {omitted_total}."
         )
 

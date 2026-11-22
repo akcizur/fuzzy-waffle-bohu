@@ -11,7 +11,7 @@ OBJ = ROOT / "house.obj"
 TXT = ROOT / "house.txt"
 MTL = ROOT / "house.mtl"
 
-EXPECTED = {"vertices": 9455, "uvs": 2795, "normals": 1370, "faces": 6891}
+EXPECTED = {"vertices": 9455, "uvs": 2795, "normals": 1370, "faces": 6889}
 REVEAL_OBJECT_MARKER = "_opening_reveal"
 
 
@@ -139,7 +139,7 @@ def main():
         "apartment_column_floor_06": 355,
         "apartment_column_floor_07": 343,
         "apartment_column_floor_08": 342,
-        "apartment_column_floor_09": 342,
+        "apartment_column_floor_09": 340,
         "apartment_column_floor_10": 332,
         "apartment_column_floor_11": 346,
     }

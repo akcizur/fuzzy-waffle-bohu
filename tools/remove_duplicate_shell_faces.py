@@ -32,7 +32,7 @@ EXPECTED_REMOVALS = {
     "apartment_column_floor_06": 0,
     "apartment_column_floor_07": 12,
     "apartment_column_floor_08": 13,
-    "apartment_column_floor_09": 13,
+    "apartment_column_floor_09": 15,
     "apartment_column_floor_10": 23,
     "apartment_column_floor_11": 9,
 }

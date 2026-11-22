@@ -34,7 +34,7 @@ Výsledné moduly apartment_column_floor_01 až apartment_column_floor_11 obsahu
 | 6 | 355 | 0 |
 | 7 | 343 | 12 |
 | 8 | 342 | 13 |
-| 9 | 342 | 13 |
+| 9 | 340 | 15 |
 | 10 | 332 | 23 |
 | 11 | 346 | 9 |
 
@@ -112,8 +112,8 @@ Prohlížeč načítá Three.js a jeho OBJ/MTL loadery z CDN. Model a materiály
 | Vrcholy | 9,455 |
 | UV souřadnice | 2,795 |
 | Normály | 1,370 |
-| Polygony | 6,891 |
-| Bytové moduly | 11 (3,775 ploch po odstranění překryvů) |
+| Polygony | 6,889 |
+| Bytové moduly | 11 (3,773 ploch po odstranění překryvů) |
 | Vnější průchozí otvory | 22 |
 | Vnitřní průchozí dveřní otvory | 22 |
 | Ostění | 84 ploch celkem / 78 nových |
